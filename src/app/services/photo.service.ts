@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Storage } from '@capacitor/storage';
+import { Platform } from '@ionic/angular';
+
 import { Photo as PhotoModel} from '../models/Photo';
 @Injectable({
   providedIn: 'root'
@@ -9,8 +12,11 @@ import { Photo as PhotoModel} from '../models/Photo';
 export class PhotoService {
   public photos: PhotoModel[] = [];
   private PHOTO_STORAGE: string = "photos";
+  private platform: Platform;
 
-  constructor() { }
+  constructor(platform: Platform) {
+    this.platform = platform;
+  }
 
   public async addNewToGallery() {
     // Take a photo
@@ -40,17 +46,33 @@ export class PhotoService {
       directory: Directory.Data
     });
 
-    return {
-      filepath: fileName,
-      webviewPath: cameraPhoto.webPath
-    };
+    if (this.platform.is('hybrid')) {
+      return {
+        filepath: savedFile.uri,
+        webviewPath: Capacitor.convertFileSrc(savedFile.uri),
+      };
+    }
+    else {
+      return {
+        filepath: fileName,
+        webviewPath: cameraPhoto.webPath
+      };
+    }
   }
 
   private async readAsBase64(cameraPhoto: Photo) {
-    const response = await fetch(cameraPhoto.webPath);
-    const blob = await response.blob();
-
-    return await this.convertBlobToBase64(blob) as string;
+    if (this.platform.is('hybrid')) {
+      const file = await Filesystem.readFile({
+        path: cameraPhoto.path
+      });
+  
+      return file.data;
+    } else {
+      const response = await fetch(cameraPhoto.webPath);
+      const blob = await response.blob();
+  
+      return await this.convertBlobToBase64(blob) as string;
+    }
   }
 
   convertBlobToBase64 = (blob: Blob) => new Promise((resolve, reject) => {
@@ -66,14 +88,16 @@ export class PhotoService {
     const photoList = await Storage.get({ key: this.PHOTO_STORAGE });
     this.photos = JSON.parse(photoList.value) || [];
   
-    for (let photo of this.photos) {
-      const readFile = await Filesystem.readFile({
-          path: photo.filepath,
-          directory: Directory.Data
-      });
-    
-      // Web platform
-      photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+    if (!this.platform.is('hybrid')) {
+      for (let photo of this.photos) {
+        const readFile = await Filesystem.readFile({
+            path: photo.filepath,
+            directory: Directory.Data
+        });
+      
+        // Web platform
+        photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+      }
     }
   }
 }

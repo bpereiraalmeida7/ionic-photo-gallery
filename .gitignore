@@ -20,7 +20,6 @@ npm-debug.log*
 /.idea
 /.ionic
 /.sass-cache
-/.gradle
 /.sourcemaps
 /.versions
 /.vscode
@@ -30,5 +29,3 @@ npm-debug.log*
 /platforms
 /plugins
 /www
-/android
-/gradle
