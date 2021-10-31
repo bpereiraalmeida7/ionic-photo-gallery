@@ -11,20 +11,22 @@ import { Photo } from '../models/Photo';
 })
 export class Tab2Page {
 
+  public grid: boolean = true;
+
   constructor(
     public photoService: PhotoService,
     public actionSheetController: ActionSheetController
   ) {}
 
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
     await this.photoService.loadSaved();
   }
   
-  public addPhotoToGallery() {
+  public addPhotoToGallery(): void {
     this.photoService.addNewToGallery();
   }
 
-  public async showActionSheet(photo: Photo, position: number) {
+  public async showActionSheet(photo: Photo, position: number): Promise<void> {
     const actionSheet = await this.actionSheetController.create({
       header: 'Fotos',
       buttons: [{
@@ -43,5 +45,9 @@ export class Tab2Page {
     });
 
     await actionSheet.present();
+  }
+
+  public changeGrid(): void {
+    this.grid = !this.grid;
   }
 }
