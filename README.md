@@ -1,2 +1,2 @@
 # :construction: ionic-photo-gallery
-Ionic photo gallery application, deployed as native app using Capacitor.
+Aplicativo de galeria de fotos Ionic, com login do Google, e implantado como aplicativo nativo usando Capacitor.
