@@ -27,6 +27,10 @@ export class Tab2Page {
   }
 
   public async showActionSheet(photo: Photo, position: number): Promise<void> {
+    //in construction
+  }
+
+  public async showActionDeletePicture(photo: Photo, position: number): Promise<void> {
     const actionSheet = await this.actionSheetController.create({
       header: 'Fotos',
       buttons: [{
